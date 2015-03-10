@@ -1,4 +1,5 @@
-#include "boost/property_tree/ptree.hpp"
+#include <boost/property_tree/ptree.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include <iostream>
 namespace bp = boost::property_tree;
@@ -38,8 +39,7 @@ void CreateJson1() {
   contracts_tree.add_child("students",list);
 }
 
-
-boost::property_tree::ptree MakeConfig() {
+bp::ptree MakeConfig() {
 //  {
 //      "system1": {
 //        "name1": "value1",
@@ -85,7 +85,7 @@ boost::property_tree::ptree MakeConfig() {
 //      ]
 //  }
 
-  boost::property_tree::ptree config_tree;
+  bp::ptree config_tree;
 
   // system1
   auto& system1_tree = config_tree.add_child("system1", bp::ptree());
@@ -104,11 +104,9 @@ boost::property_tree::ptree MakeConfig() {
 
   // system3
   auto& system3_tree = config_tree.add_child("system3", bp::ptree());
-
   auto& sub1g_tree = system3_tree.add_child("sub1", bp::ptree()).add_child("grand_sub", bp::ptree());
   sub1g_tree.put("host",  "localhost");
   sub1g_tree.put("port",  8000);
-
   auto& sub2g_tree = system3_tree.add_child("sub2",  bp::ptree()).add_child("grand_sub", bp::ptree());
   sub2g_tree.put("host",  "localhost");
   sub2g_tree.put("port",  8001);
@@ -137,6 +135,46 @@ boost::property_tree::ptree MakeConfig() {
 using namespace std;
 
 int main() {
-	cout << "Hello World!!!" << endl; // prints Hello World!!!
+	auto config = MakeConfig();
+
+  for (auto& e : config ) {
+    std::cout << e.first << ": " << e.second.data() << std::endl;
+  }
+
+  auto system1  = config.get_child("system1");
+  auto system2  = config.get_child("system2");
+  auto system3  = config.get_child("system3");
+  auto system4  = config.get_child("system4");
+  auto system5  = config.get_child("system5");
+
+
+  std::cout << "name1 => " << system1.get("name1", "") << std::endl;
+  std::cout << "name2 => " << system1.get("name2", "") << std::endl;
+  std::cout << "name3 => " << system1.get("name3", "") << std::endl;
+  std::cout << "name4 => " << system1.get("name4", "") << std::endl;
+
+  std::cout << "name1 => " << system2.get("name1", "")    << std::endl;
+  std::cout << "name2 => " << system2.get("name2", "")    << std::endl;
+  std::cout << "name3 => " << system2.get("name3", false) << std::endl;
+  std::cout << "name4 => " << system2.get("name4", 0)     << std::endl;
+  std::cout << "name5 => " << system2.get("name5", 0)     << std::endl;
+
+  std::cout << "sub1: " << system3.get_child("sub1").begin()->first << std::endl;
+  std::cout << "host => " << system3.get_child("sub1").begin()->second.get("host", "")  << std::endl;
+  std::cout << "port => " << system3.get_child("sub1").begin()->second.get("port", 0)   << std::endl;
+  std::cout << "sub2: " << system3.get_child("sub2").begin()->first << std::endl;
+  std::cout << "host => " << system3.get_child("sub2").begin()->second.get("host", "")  << std::endl;
+  std::cout << "port => " << system3.get_child("sub2").begin()->second.get("port", 0)   << std::endl;
+
+  for (auto e : system4) {
+    auto name = e.second.get("name", "");
+    auto age  = e.second.get("age",  0);
+    std::cout << name << " => " << age << std::endl;
+  }
+
+  for (auto e : system5) {
+    std::cout << e.second.data() << std::endl;
+  }
+
 	return 0;
 }
